@@ -29,9 +29,39 @@ app.get('/', (req,res) => {
     });
 });
 
-db.query(`SELECT * FROM candidates`, (err, rows) => {
-    console.log(rows);
-})
+// gets the table of candidates, displayed in text rows
+// db.query(`SELECT * FROM candidates`, (err, rows) => {
+//     // console.log(rows);
+// })
+
+// // GET a single candidate based on ID
+// db.query(`SELECT * FROM candidates WHERE id =1`, (err, row) => {
+//     if(err) {
+//         console.log(err);
+//     }
+//     console.log(row);
+// })
+
+// DELETE a single candidate based on ID
+/* Notice we have id set to ?, making it a prepared statement. This can execute SQL statements repeatedly using different values in place of the ? */
+// db.query(`DELETE FROM candidates WHERE id = ?`,1,(err, result) => {
+//     if(err) {
+//         console.log(err);
+//     }
+//     console.log(result);
+// })
+
+// CREATE a single candidate 
+// const sql = `INSERT INTO candidates (id, first_name,last_name, industry_connected)
+// VALUES( ?,?,?,?)`;
+// const params = [1, 'Ronald', 'Firbank', 1];
+
+// db.query(sql, params, (err, result) => {
+//     if(err) {
+//         console.log(err);
+//     }
+//     console.log(result);
+// });
 
 //handle user requests not supported by app(NOT FOUND) catchall route
 app.use((req,res) => {
