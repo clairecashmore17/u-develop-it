@@ -5,6 +5,7 @@ const app = express();
 const inputCheck = require('./utils/inputCheck');
 //mysql package
 const mysql = require('mysql2');
+const { resourceLimits } = require('worker_threads');
 
 // addding express middleware
 app.use(express.urlencoded({ extended: false }));
@@ -23,7 +24,7 @@ const db = mysql.createConnection(
     console.log('Connected to the election database.')
 );
 
-
+/* CANDIDATES SECTION */
 
 // Get all candidates
 app.get('/api/candidates', (req,res) => {
@@ -70,10 +71,12 @@ app.get('/api/candidates/:id', (req,res) => {
     });
 });
 
-app.delete('/api/candidates/:id', (req,res) => {
+
+ // DELETE a single candidate based on ID
+ app.delete('/api/candidates/:id', (req,res) => {
     const sql =`DELETE FROM candidates WHERE id = ?`;
     const params = [req.params.id];
-    // DELETE a single candidate based on ID
+   
     /* Notice we have id set to ?, making it a prepared statement. This can execute SQL statements repeatedly using different values in place of the ? */
     db.query(sql,params,(err, result) => {
         if(err) {
@@ -114,6 +117,97 @@ app.post('/api/candidates',({ body}, res) => {
         });
     });
 });
+
+//UPDATE a candidate
+app.put('/api/candidate/:id', (req, res) =>  {
+    const errors = inputCheck(req.body, 'party_id');
+
+    if (errors) {
+      res.status(400).json({ error: errors });
+      return;
+    }
+    const sql = `UPDATE candidates SET party_id = ? 
+    WHERE id = ?`;
+    const params = [req.body.party_id, req.params.id];
+    db.query(sql, params, (err, result) => {
+    if (err) {
+        res.status(400).json({ error: err.message });
+        // check if a record was found
+    } else if (!result.affectedRows) {
+        res.json({
+            message: 'Candidate not found'
+        });
+    } else {
+        res.json({
+            message: 'success',
+            data: req.body,
+            changes: result.affectedRows
+        });
+        }
+    });
+});
+/* PARTIES SECTION */
+
+// Route to get out parties
+app.get('/api/parties', (req,res) => {
+    const sql = `SELECT * FROM parties`;
+    db.query(sql, (err, rows) => {
+        if(err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({
+            message: 'success',
+            data: rows
+        });
+    });
+});
+
+// Route to find party by single ID
+app.get('/apiparty/:id', (res,req) => {
+    const sql = `SELECT * FROM parties WHERE id = ?`;
+    const params = [req.params.id];
+    db.query(sql, params, (err, row) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        res.json({
+            messgae: 'success',
+            data: row
+        });
+    });
+});
+
+//DELETE a party based on ID
+app.delete('/api/parties/:id', (req,res) => {
+    const sql = `DELETE FROM parties WHERE id = ?`;
+    const params = [req.params.id];
+    db.query(sql,params, (err,result)=> {
+        if(err){
+            res.status(400).json({ error: err.message });
+            // checks if anything was deleted
+        } else if (!result.affectedRows) {
+            res.json({
+                message: 'Party not found'
+            });
+        } else {
+            res.json({
+                message: 'deleted',
+                changes: result.affectedRows,
+                id: req.params.id
+            });
+        }
+    });
+});
+
+
+
+
+
+
+
+
 //handle user requests not supported by app(NOT FOUND) catchall route
 app.use((req,res) => {
     res.status(404).end();
