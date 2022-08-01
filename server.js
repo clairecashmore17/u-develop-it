@@ -5,7 +5,7 @@ const app = express();
 const inputCheck = require('./utils/inputCheck');
 //mysql package
 const mysql = require('mysql2');
-const { resourceLimits } = require('worker_threads');
+
 
 // addding express middleware
 app.use(express.urlencoded({ extended: false }));
@@ -72,6 +72,22 @@ app.get('/api/candidates/:id', (req,res) => {
 });
 
 
+// Example get
+app.get('/tacosandwich', (req, res) => {
+   console.log(req.body)
+    res.status(200).json("connected")
+})
+
+
+
+
+
+
+
+
+
+
+
  // DELETE a single candidate based on ID
  app.delete('/api/candidates/:id', (req,res) => {
     const sql =`DELETE FROM candidates WHERE id = ?`;
@@ -126,9 +142,12 @@ app.put('/api/candidate/:id', (req, res) =>  {
       res.status(400).json({ error: errors });
       return;
     }
+
     const sql = `UPDATE candidates SET party_id = ? 
     WHERE id = ?`;
+
     const params = [req.body.party_id, req.params.id];
+
     db.query(sql, params, (err, result) => {
     if (err) {
         res.status(400).json({ error: err.message });
