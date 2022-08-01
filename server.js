@@ -23,16 +23,15 @@ const db = mysql.createConnection(
     console.log('Connected to the election database.')
 );
 
-//GET test
-app.get('/', (req,res) => {
-    res.json({
-        message: 'Hello world!'
-    });
-});
+
 
 // Get all candidates
 app.get('/api/candidates', (req,res) => {
-    const sql = `SELECT * FROM candidates`;
+    const sql = `SELECT candidates.*, parties.name
+                 AS party_name
+                 FROM candidates
+                 LEFT JOIN parties
+                 ON candidates.party_id = parties.id`;
 
     // gets the table of candidates, displayed in text rows
     db.query(sql, (err, rows) => {
@@ -48,9 +47,14 @@ app.get('/api/candidates', (req,res) => {
     });
 });
 
-
+//displays the candidate with specific ID
 app.get('/api/candidates/:id', (req,res) => {
-    const sql = `SELECT * FROM candidates WHERE id = ?`;
+    const sql = `SELECT candidates.*, parties.name
+                AS party_name
+                FROM candidates
+                LEFT JOIN parties
+                ON candidates.party_id = parties.id
+                WHERE candidates.id = ?`;
     // selects the id that is used in url after slash
     const params = [req.params.id];
     // GET a single candidate based on ID using params

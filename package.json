@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "start": "node server.js",
-    "watch": "nodemon server.js"
+    "watch": "nodemon server.js",
+    "commit": "git add .; git commit -m 'basic commit'"
   },
   "repository": {
     "type": "git",
